@@ -4,7 +4,7 @@ import { Avatar, Button, Paper, Grid, Typography, Container, TextField } from '@
 import LockOutlinedIcon from '@material-ui/icons/LockOutlined'
 import {GoogleOAuthProvider, GoogleLogin, googleLogout} from '@react-oauth/google'
 import {useDispatch} from 'react-redux'
-import {signin, signup} from '../../actions/auth.js'
+import {signIn, signUp} from '../../actions/auth.js'
 import Input from './Input'
 import Icon from './Icon';
 
@@ -27,10 +27,10 @@ const Auth = () => {
         console.log(formData)
 
         if(isSignup){
-            dispatch(signup(formData, history))
+            dispatch(signUp(formData, history))
         }
         else{
-            dispatch(signin(formData, history))
+            dispatch(signIn(formData, history))
         }
     }
 
@@ -42,7 +42,7 @@ const Auth = () => {
 
     const switchMode = () => {
         setIsSignup((prevIsSignup) => !prevIsSignup)
-        handleShowPassword(false);
+        setShowPassword(false);
     }
 
     const googleSuccess = async (res) => {
