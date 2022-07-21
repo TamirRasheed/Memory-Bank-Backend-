@@ -1,25 +1,41 @@
 import { React, useState} from 'react'
+import {useNavigate} from 'react-router-dom'
 import { Avatar, Button, Paper, Grid, Typography, Container, TextField } from '@material-ui/core';
 import LockOutlinedIcon from '@material-ui/icons/LockOutlined'
-import GoogleLogin from 'react-google-login'
+import {GoogleOAuthProvider, GoogleLogin, googleLogout} from '@react-oauth/google'
+import {useDispatch} from 'react-redux'
+import {signin, signup} from '../../actions/auth.js'
 import Input from './Input'
 import Icon from './Icon';
 
 import useStyles from './styles';
 
+const initialState = { firstName: '', lastName: '', email: '', password: '', confirmPassword: ''}
+
 const Auth = () => {
     const classes = useStyles();
     const state = null;
     const [isSignup, setIsSignup] = useState(false)
+    const [formData, setFormData] = useState(initialState)
+    const dispatch = useDispatch();
     const [showPassword, setShowPassword] = useState(false);
+    const history = useNavigate()
 
 
-    const handleSubmit = () => {
+    const handleSubmit = (e) => {
+        e.preventDefault()
+        console.log(formData)
 
+        if(isSignup){
+            dispatch(signup(formData, history))
+        }
+        else{
+            dispatch(signin(formData, history))
+        }
     }
 
-    const handleChange = () => {
-
+    const handleChange = (e) => {
+        setFormData({...formData, [e.target.name]: e.target.value})
     }
 
     const handleShowPassword = () => setShowPassword((prevShowPassword) => !prevShowPassword)
@@ -40,6 +56,8 @@ const Auth = () => {
 
 
   return (
+    <GoogleOAuthProvider 
+                    clientId='532898531622-dlsd4kir4s4j24cctpmgfml3cl9mm86l.apps.googleusercontent.com'>
     <Container component="main" maxWidth="xs">
         <Paper className = {classes.paper} elevation = {3}>
             <Avatar className={classes.avatar}>
@@ -52,7 +70,7 @@ const Auth = () => {
                         isSignup && (
                             <>
                                 <Input name="firstName" label="First Name" handleChange={handleChange} autoFocus half />
-                                <Input name="firstName" label="First Name" handleChange={handleChange} half />
+                                <Input name="lastName" label="Last Name" handleChange={handleChange} half />
                             </>
                         )}
                         <Input name="email" label="Email Address" handleChange={handleChange} type="email" />
@@ -62,26 +80,18 @@ const Auth = () => {
                 <Button type="submit" fullWidth variant="contained" color="primary" className={classes.submit}>
                     {isSignup ? 'Sign Up' : 'Sign in'}
                 </Button>
-                <GoogleLogin 
-                    clientId='532898531622-dlsd4kir4s4j24cctpmgfml3cl9mm86l.apps.googleusercontent.com'
-                    render={(renderProps) => (
-                        <Button className={classes.googleButton} color='primary' fullWidth onClick={renderProps.onClick} disabled={renderProps.disabled} startIcon={<Icon />} variant='contained'>Log in with Google</Button>
-                        )}
-                        onSuccess={googleSuccess}
-                        onFailure={googleFailure}
-                        cookiePolicy="single_host_origin"
-                        />
                 <Grid container justify="flex-end">
                     <Grid item>
                         <Button onClick={switchMode}>
                             {isSignup ? 'Already have an account? Sign in' : "Don't have an account? Sign up" }
+                        <GoogleLogin onSuccess={(response) => console.log(response)}/>
                         </Button>
                     </Grid>
                 </Grid>
             </form>
-
         </Paper>
     </Container>
+    </GoogleOAuthProvider>
   )
 }
 export default Auth;
