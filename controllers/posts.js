@@ -3,17 +3,35 @@ import postMessage from "../models/postMessage.js";
 import router from "../routes/posts.js";
 
 export const getPosts = async (req, res) => {
+    const { page } = req.query
     try {
-        const postMessages = await postMessage.find();
+        const LIMIT = 8;
+        const startIndex = (Number(page) - 1) * LIMIT //Get the starting index of every page
+        const total = await postMessage.countDocuments({})
 
-        console.log(postMessages);
+        const posts = await postMessage.find().sort({ _id: -1}).limit(LIMIT).skip(startIndex);
+        console.log(posts);
 
-        res.status(200).json(postMessages);
+        res.status(200).json({data: posts, currentPage: Number(page), numberOFPages: Math.ceil(total / LIMIT)});
     }
     catch (error) {
         res.status(404).json({message: error.message});
     }
 };
+
+export const getPostsBySearch = async(req, res) => {
+    const { searchQuery, tags} = req.query
+
+    try {
+        const title = new RegExp(searchQuery, 'i')
+
+        const posts = await postMessage.find({ $or: [ {title}, {tags: {$in: tags.split(',')}}] })
+        
+        res.json({ data: posts})
+    } catch (error) {
+        res.status(404).json({message: error.message})
+    }
+}
 
 export const createPost = async (req, res) => {
     const post = req.body;
